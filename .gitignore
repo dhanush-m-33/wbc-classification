@@ -1,0 +1,33 @@
+# Data: huge, and dataset licences may not allow redistribution
+/data/raw/
+/data/processed/
+/data/manifests/processed_*.csv
+
+# Model outputs
+/models/
+/checkpoints/
+/runs/
+*.pt
+*.pth
+*.h5
+*.keras
+*.onnx
+*.npy
+*.npz
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+env/
+.ipynb_checkpoints/
+*.egg-info/
+
+# Editor / OS
+.vscode/
+.idea/
+Thumbs.db
+
+# Secrets
+.env
