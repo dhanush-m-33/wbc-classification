@@ -1,0 +1,296 @@
+{
+  "dataset": "raabin",
+  "target_source": "Class-derived weak supervision; this report does not verify independently observed cell morphology.",
+  "method": "Within each fold of a group-stratified 5-fold split of the original validation fold, select the temperature and monocyte cutoff using the other four folds. Aggregate only out-of-fold predictions for the validation F1 report. Fit a final setting on the full validation fold for the exported prediction file.",
+  "cross_validation": {
+    "method": "StratifiedGroupKFold",
+    "folds": 5,
+    "seed": 2026,
+    "samples": 1968,
+    "groups": 1968,
+    "fold_settings": [
+      {
+        "temperature": 12.0,
+        "threshold": 0.9993905767924713,
+        "calibration_f1": 0.7909604519774012,
+        "calibration_samples": 1574,
+        "evaluation_samples": 394,
+        "calibration_groups": 1574,
+        "evaluation_groups": 394
+      },
+      {
+        "temperature": 8.0,
+        "threshold": 0.9927945881890075,
+        "calibration_f1": 0.7717391304347826,
+        "calibration_samples": 1574,
+        "evaluation_samples": 394,
+        "calibration_groups": 1574,
+        "evaluation_groups": 394
+      },
+      {
+        "temperature": 12.0,
+        "threshold": 0.9993905767924713,
+        "calibration_f1": 0.7640449438202247,
+        "calibration_samples": 1574,
+        "evaluation_samples": 394,
+        "calibration_groups": 1574,
+        "evaluation_groups": 394
+      },
+      {
+        "temperature": 12.0,
+        "threshold": 0.9993905767924713,
+        "calibration_f1": 0.8,
+        "calibration_samples": 1575,
+        "evaluation_samples": 393,
+        "calibration_groups": 1575,
+        "evaluation_groups": 393
+      },
+      {
+        "temperature": 12.0,
+        "threshold": 0.9993905767924713,
+        "calibration_f1": 0.7845303867403315,
+        "calibration_samples": 1575,
+        "evaluation_samples": 393,
+        "calibration_groups": 1575,
+        "evaluation_groups": 393
+      }
+    ],
+    "groups_overlap_between_calibration_and_evaluation": false
+  },
+  "final_export_calibration": {
+    "temperature": 12.0,
+    "threshold": 0.9993905767924713,
+    "calibration_f1": 0.7822222222222223,
+    "samples": 1968,
+    "groups": 1968,
+    "temperature_candidates": [
+      0.5,
+      1.0,
+      2.0,
+      3.0,
+      5.0,
+      8.0,
+      12.0,
+      20.0
+    ]
+  },
+  "monocyte_class_likelihood_cross_validated": {
+    "baseline_cnn_predicted_class": {
+      "accuracy": 0.9654471544715447,
+      "precision": 0.6346153846153846,
+      "recall": 0.9,
+      "f1": 0.7443609022556391,
+      "positive_support": 110,
+      "note": null
+    },
+    "cross_validated_class_likelihood": {
+      "accuracy": 0.9745934959349594,
+      "precision": 0.7631578947368421,
+      "recall": 0.7909090909090909,
+      "f1": 0.7767857142857143,
+      "positive_support": 110,
+      "note": null
+    }
+  },
+  "feature_metrics": {
+    "granules": {
+      "baseline_cnn": {
+        "accuracy": 0.967479674796748,
+        "precision": 0.9852180339985218,
+        "recall": 0.9680464778503994,
+        "f1": 0.9765567765567765,
+        "positive_support": 1377,
+        "note": null
+      },
+      "hybrid_cross_validated": {
+        "accuracy": 0.967479674796748,
+        "precision": 0.9852180339985218,
+        "recall": 0.9680464778503994,
+        "f1": 0.9765567765567765,
+        "positive_support": 1377,
+        "note": null
+      },
+      "source": "original_cnn_binary"
+    },
+    "dense_pink_granules": {
+      "baseline_cnn": {
+        "accuracy": 0.9817073170731707,
+        "precision": 0.8978102189781022,
+        "recall": 0.8482758620689655,
+        "f1": 0.8723404255319149,
+        "positive_support": 145,
+        "note": null
+      },
+      "hybrid_cross_validated": {
+        "accuracy": 0.9817073170731707,
+        "precision": 0.8978102189781022,
+        "recall": 0.8482758620689655,
+        "f1": 0.8723404255319149,
+        "positive_support": 145,
+        "note": null
+      },
+      "source": "original_cnn_binary"
+    },
+    "dense_blue_granules": {
+      "baseline_cnn": {
+        "accuracy": 1.0,
+        "precision": null,
+        "recall": null,
+        "f1": null,
+        "positive_support": 0,
+        "note": "Undefined: evaluation groups have no positive weak targets."
+      },
+      "hybrid_cross_validated": {
+        "accuracy": 1.0,
+        "precision": null,
+        "recall": null,
+        "f1": null,
+        "positive_support": 0,
+        "note": "Undefined: evaluation groups have no positive weak targets."
+      },
+      "source": "original_cnn_binary"
+    },
+    "thin_rim_of_cytoplasm": {
+      "baseline_cnn": {
+        "accuracy": 0.9527439024390244,
+        "precision": 0.9532710280373832,
+        "recall": 0.8482328482328483,
+        "f1": 0.8976897689768977,
+        "positive_support": 481,
+        "note": null
+      },
+      "hybrid_cross_validated": {
+        "accuracy": 0.9527439024390244,
+        "precision": 0.9532710280373832,
+        "recall": 0.8482328482328483,
+        "f1": 0.8976897689768977,
+        "positive_support": 481,
+        "note": null
+      },
+      "source": "original_cnn_binary"
+    },
+    "abundant_cytoplasm": {
+      "baseline_cnn": {
+        "accuracy": 0.9623983739837398,
+        "precision": 0.6111111111111112,
+        "recall": 0.9,
+        "f1": 0.7279411764705882,
+        "positive_support": 110,
+        "note": null
+      },
+      "hybrid_cross_validated": {
+        "accuracy": 0.9745934959349594,
+        "precision": 0.7631578947368421,
+        "recall": 0.7909090909090909,
+        "f1": 0.7767857142857143,
+        "positive_support": 110,
+        "note": null
+      },
+      "source": "cross-validated_thresholded_monocyte_class_likelihood"
+    },
+    "multi_lobed_nucleus_3_5": {
+      "baseline_cnn": {
+        "accuracy": 0.9695121951219512,
+        "precision": 0.9875207986688852,
+        "recall": 0.963474025974026,
+        "f1": 0.9753492193919474,
+        "positive_support": 1232,
+        "note": null
+      },
+      "hybrid_cross_validated": {
+        "accuracy": 0.9695121951219512,
+        "precision": 0.9875207986688852,
+        "recall": 0.963474025974026,
+        "f1": 0.9753492193919474,
+        "positive_support": 1232,
+        "note": null
+      },
+      "source": "original_cnn_binary"
+    },
+    "bilobed_nucleus": {
+      "baseline_cnn": {
+        "accuracy": 0.9811991869918699,
+        "precision": 0.8857142857142857,
+        "recall": 0.8551724137931035,
+        "f1": 0.8701754385964913,
+        "positive_support": 145,
+        "note": null
+      },
+      "hybrid_cross_validated": {
+        "accuracy": 0.9811991869918699,
+        "precision": 0.8857142857142857,
+        "recall": 0.8551724137931035,
+        "f1": 0.8701754385964913,
+        "positive_support": 145,
+        "note": null
+      },
+      "source": "original_cnn_binary"
+    },
+    "kidney_bean_shaped_nucleus": {
+      "baseline_cnn": {
+        "accuracy": 0.9629065040650406,
+        "precision": 0.6178343949044586,
+        "recall": 0.8818181818181818,
+        "f1": 0.7265917602996255,
+        "positive_support": 110,
+        "note": null
+      },
+      "hybrid_cross_validated": {
+        "accuracy": 0.9745934959349594,
+        "precision": 0.7631578947368421,
+        "recall": 0.7909090909090909,
+        "f1": 0.7767857142857143,
+        "positive_support": 110,
+        "note": null
+      },
+      "source": "cross-validated_thresholded_monocyte_class_likelihood"
+    },
+    "eccentric_and_large_nucleus": {
+      "baseline_cnn": {
+        "accuracy": 0.9613821138211383,
+        "precision": 0.6036585365853658,
+        "recall": 0.9,
+        "f1": 0.7226277372262774,
+        "positive_support": 110,
+        "note": null
+      },
+      "hybrid_cross_validated": {
+        "accuracy": 0.9745934959349594,
+        "precision": 0.7631578947368421,
+        "recall": 0.7909090909090909,
+        "f1": 0.7767857142857143,
+        "positive_support": 110,
+        "note": null
+      },
+      "source": "cross-validated_thresholded_monocyte_class_likelihood"
+    },
+    "small_size_dense_cytoplasm": {
+      "baseline_cnn": {
+        "accuracy": 0.9547764227642277,
+        "precision": 0.960093896713615,
+        "recall": 0.8503118503118503,
+        "f1": 0.9018743109151047,
+        "positive_support": 481,
+        "note": null
+      },
+      "hybrid_cross_validated": {
+        "accuracy": 0.9547764227642277,
+        "precision": 0.960093896713615,
+        "recall": 0.8503118503118503,
+        "f1": 0.9018743109151047,
+        "positive_support": 481,
+        "note": null
+      },
+      "source": "original_cnn_binary"
+    }
+  },
+  "feature_f1_summary_csv": "D:\\vscode\\wbc-classification\\reports\\raabin_feature_f1_summary_latest.csv",
+  "macro_f1_over_features_with_positive_weak_targets": {
+    "baseline_cnn": 0.8523496237739582,
+    "optimized_hybrid": 0.8693714536473638,
+    "feature_count": 9,
+    "evaluation_method": "pooled out-of-fold predictions"
+  },
+  "predictions_written": 9962,
+  "hybrid_predictions_path": "D:\\vscode\\wbc-classification\\results\\raabin_train_feature_predictions_hybrid_latest.csv"
+}

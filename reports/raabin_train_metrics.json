@@ -1,0 +1,106 @@
+
+{
+  "source_manifest": "D:\\vscode\\wbc-classification\\data\\manifests\\processed_raabin_train.csv",
+  "dataset": "raabin",
+  "split": "train",
+  "training_samples": 7871,
+  "validation_samples": 1968,
+  "rejected_qc_rows": 0,
+  "class_counts": {
+    "eosinophil": 725,
+    "lymphocyte": 2404,
+    "monocyte": 552,
+    "neutrophil": 6158
+  },
+  "validation_accuracy": 0.8673780487804879,
+  "validation_balanced_accuracy": 0.8079692790899689,
+  "validation_macro_f1": 0.7931491966373999,
+  "classification_report": {
+    "eosinophil": {
+      "precision": 0.6766917293233082,
+      "recall": 0.6206896551724138,
+      "f1-score": 0.6474820143884892,
+      "support": 145.0
+    },
+    "lymphocyte": {
+      "precision": 0.863013698630137,
+      "recall": 0.7858627858627859,
+      "f1-score": 0.8226332970620239,
+      "support": 481.0
+    },
+    "monocyte": {
+      "precision": 0.6971830985915493,
+      "recall": 0.9,
+      "f1-score": 0.7857142857142857,
+      "support": 110.0
+    },
+    "neutrophil": {
+      "precision": 0.9083665338645418,
+      "recall": 0.9253246753246753,
+      "f1-score": 0.916767189384801,
+      "support": 1232.0
+    },
+    "accuracy": 0.8673780487804879,
+    "macro avg": {
+      "precision": 0.7863137651023842,
+      "recall": 0.8079692790899689,
+      "f1-score": 0.7931491966373999,
+      "support": 1968.0
+    },
+    "weighted avg": {
+      "precision": 0.868408333515834,
+      "recall": 0.8673780487804879,
+      "f1-score": 0.8665941345141314,
+      "support": 1968.0
+    }
+  },
+  "confusion_matrix": [
+    [
+      90,
+      10,
+      8,
+      37
+    ],
+    [
+      8,
+      378,
+      19,
+      76
+    ],
+    [
+      5,
+      4,
+      99,
+      2
+    ],
+    [
+      30,
+      46,
+      16,
+      1140
+    ]
+  ],
+  "confusion_matrix_labels": [
+    "eosinophil",
+    "lymphocyte",
+    "monocyte",
+    "neutrophil"
+  ],
+  "features": [
+    "win_frac",
+    "box_area_fraction",
+    "nucleus_area_fraction",
+    "nucleus_centre_distance",
+    "nuc_w_fraction",
+    "nuc_h_fraction",
+    "nuc_chroma",
+    "mean_r",
+    "mean_g",
+    "mean_b"
+  ],
+  "seed": 42,
+  "trees": 200,
+  "max_features": "sqrt",
+  "min_samples_leaf": 2,
+  "max_depth": 24
+}

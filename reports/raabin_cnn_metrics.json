@@ -1,0 +1,139 @@
+{
+  "dataset": "raabin",
+  "primary_manifest": "D:\\vscode\\wbc-classification\\data\\manifests\\raabin_train.csv",
+  "processed_manifest": "D:\\vscode\\wbc-classification\\data\\manifests\\processed_raabin_train.csv",
+  "processed_images_used_for_training": 9839,
+  "prediction_rows_written": 9962,
+  "missing_original_manifest_paths": [],
+  "missing_processed_image_paths": [
+    "D:\\vscode\\wbc-classification\\data\\processed\\raabin\\train\\eosinophil\\95-5-4-1_133_1.png"
+  ],
+  "rows_excluded_from_training_by_qc_or_missing_processed_image": 124,
+  "class_counts_accepted_for_training": {
+    "eosinophil": 725,
+    "lymphocyte": 2404,
+    "monocyte": 552,
+    "neutrophil": 6158
+  },
+  "class_weights": {
+    "eosinophil": 3.3926724137931035,
+    "lymphocyte": 1.0232709308372334,
+    "monocyte": 4.451923076923077,
+    "neutrophil": 0.3994620381648396
+  },
+  "train_samples": 7871,
+  "validation_samples": 1968,
+  "train_class_counts": {
+    "eosinophil": 580,
+    "lymphocyte": 1923,
+    "monocyte": 442,
+    "neutrophil": 4926
+  },
+  "validation_class_counts": {
+    "eosinophil": 145,
+    "lymphocyte": 481,
+    "monocyte": 110,
+    "neutrophil": 1232
+  },
+  "validation_groups_overlap_training": false,
+  "best_epoch": 21,
+  "epochs_completed": 25,
+  "training_loss_at_best_epoch": 0.1125250831246376,
+  "validation_loss_at_best_epoch": 0.0922732874751091,
+  "test_evaluated": false,
+  "test_loss": null,
+  "test_metrics": null,
+  "test_evaluation_note": "Not evaluated: the user requested training-only validation until processed TestA/TestB images are provided.",
+  "feature_metric_interpretation": "Validation precision, recall, and F1 measure agreement with class-derived weak targets, not independently annotated morphology.",
+  "validation_feature_metrics_against_weak_targets": {
+    "granules": {
+      "precision": 0.9852180339985218,
+      "recall": 0.9680464778503994,
+      "f1": 0.9765567765567765,
+      "support": 1377,
+      "note": null
+    },
+    "dense_pink_granules": {
+      "precision": 0.8978102189781022,
+      "recall": 0.8482758620689655,
+      "f1": 0.8723404255319149,
+      "support": 145,
+      "note": null
+    },
+    "dense_blue_granules": {
+      "precision": null,
+      "recall": null,
+      "f1": null,
+      "support": 0,
+      "note": "Undefined: no positive weak targets exist for this feature."
+    },
+    "thin_rim_of_cytoplasm": {
+      "precision": 0.9532710280373832,
+      "recall": 0.8482328482328483,
+      "f1": 0.8976897689768977,
+      "support": 481,
+      "note": null
+    },
+    "abundant_cytoplasm": {
+      "precision": 0.6111111111111112,
+      "recall": 0.9,
+      "f1": 0.7279411764705882,
+      "support": 110,
+      "note": null
+    },
+    "multi_lobed_nucleus_3_5": {
+      "precision": 0.9875207986688852,
+      "recall": 0.963474025974026,
+      "f1": 0.9753492193919474,
+      "support": 1232,
+      "note": null
+    },
+    "bilobed_nucleus": {
+      "precision": 0.8857142857142857,
+      "recall": 0.8551724137931035,
+      "f1": 0.8701754385964913,
+      "support": 145,
+      "note": null
+    },
+    "kidney_bean_shaped_nucleus": {
+      "precision": 0.6178343949044586,
+      "recall": 0.8818181818181818,
+      "f1": 0.7265917602996255,
+      "support": 110,
+      "note": null
+    },
+    "eccentric_and_large_nucleus": {
+      "precision": 0.6036585365853658,
+      "recall": 0.9,
+      "f1": 0.7226277372262774,
+      "support": 110,
+      "note": null
+    },
+    "small_size_dense_cytoplasm": {
+      "precision": 0.960093896713615,
+      "recall": 0.8503118503118503,
+      "f1": 0.9018743109151047,
+      "support": 481,
+      "note": null
+    }
+  },
+  "training_history_json": "D:\\vscode\\wbc-classification\\reports\\raabin_cnn_training_history.json",
+  "loss_plot": "D:\\vscode\\wbc-classification\\reports\\raabin_cnn_loss.png",
+  "metrics_plot": "D:\\vscode\\wbc-classification\\reports\\raabin_cnn_metrics.png",
+  "model_path": "D:\\vscode\\wbc-classification\\models\\raabin_morphology_cnn.keras",
+  "prediction_csv": "D:\\vscode\\wbc-classification\\results\\raabin_train_feature_predictions_latest.csv",
+  "hybrid_prediction_csv": "D:\\vscode\\wbc-classification\\results\\raabin_train_feature_predictions_hybrid_latest.csv",
+  "hybrid_validation_report": "D:\\vscode\\wbc-classification\\reports\\raabin_hybrid_feature_metrics_latest.json",
+  "feature_f1_summary_csv": "D:\\vscode\\wbc-classification\\reports\\raabin_feature_f1_summary_latest.csv",
+  "feature_mapping": "D:\\vscode\\wbc-classification\\features\\raabin_morphology_feature_mapping.json",
+  "feature_target_source": "class-based weak supervision; no per-feature annotations present",
+  "image_size": [
+    64,
+    64
+  ],
+  "seed": 42,
+  "tensorflow_version": "2.22.0-rc0",
+  "tensorflow_devices": [
+    "/physical_device:CPU:0"
+  ]
+}

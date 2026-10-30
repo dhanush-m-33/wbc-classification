@@ -1,0 +1,85 @@
+{
+  "feature_names": [
+    "granules",
+    "dense_pink_granules",
+    "dense_blue_granules",
+    "thin_rim_of_cytoplasm",
+    "abundant_cytoplasm",
+    "multi_lobed_nucleus_3_5",
+    "bilobed_nucleus",
+    "kidney_bean_shaped_nucleus",
+    "eccentric_and_large_nucleus",
+    "small_size_dense_cytoplasm"
+  ],
+  "feature_descriptions": {
+    "granules": "Granules",
+    "dense_pink_granules": "Dense pink granules",
+    "dense_blue_granules": "Dense blue granules",
+    "thin_rim_of_cytoplasm": "Thin rim of cytoplasm",
+    "abundant_cytoplasm": "Abundant cytoplasm",
+    "multi_lobed_nucleus_3_5": "Multi-lobed (3-5) nucleus",
+    "bilobed_nucleus": "Bilobed nucleus",
+    "kidney_bean_shaped_nucleus": "Kidney bean-shaped nucleus",
+    "eccentric_and_large_nucleus": "Eccentric and large nucleus",
+    "small_size_dense_cytoplasm": "Small size / Same as RBC, dense cytoplasm"
+  },
+  "target_source": "class-based weak supervision; no per-feature annotations present",
+  "class_weak_supervision_targets": {
+    "eosinophil": [
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0
+    ],
+    "lymphocyte": [
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1
+    ],
+    "monocyte": [
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      1,
+      1,
+      0
+    ],
+    "neutrophil": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  "continuous_output": "10 sigmoid probabilities in feature_names order",
+  "binary_threshold": 0.5,
+  "confidence_thresholds": {
+    "probability_below_0_40": "0, high confidence",
+    "probability_0_40_to_below_0_50": "0, low confidence",
+    "probability_0_50_to_below_0_60": "1, low confidence",
+    "probability_at_least_0_60": "1, high confidence"
+  }
+}
