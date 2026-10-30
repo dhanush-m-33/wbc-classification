@@ -1,0 +1,120 @@
+{
+  "dataset": "raabin",
+  "split_used": "train only",
+  "target_source": "Class-derived weak supervision; not per-image human morphology labels.",
+  "important_limitations": [
+    "Feature scores estimate the class-derived targets and do not establish accurate visual morphology recognition.",
+    "dense_blue_granules has no positive class-derived targets and cannot be learned as a positive feature from this mapping.",
+    "No RAABIN test split was used for training or evaluated here."
+  ],
+  "image_size": [
+    64,
+    64
+  ],
+  "train_images": 7871,
+  "validation_images": 1968,
+  "skipped_manifest_rows_without_processed_images": 124,
+  "training_class_counts": {
+    "eosinophil": 580,
+    "lymphocyte": 1923,
+    "monocyte": 442,
+    "neutrophil": 4926
+  },
+  "class_weights": {
+    "eosinophil": 3.3926724137931035,
+    "lymphocyte": 1.0232709308372334,
+    "monocyte": 4.451923076923077,
+    "neutrophil": 0.3994620381648396
+  },
+  "group_overlap": false,
+  "seed": 42,
+  "epochs_completed": 23,
+  "best_epoch": 18,
+  "validation_loss_at_best_epoch": 0.0968795046210289,
+  "validation_macro_f1_on_weak_targets": 0.8203439175130948,
+  "validation_metrics_by_feature_on_weak_targets": {
+    "granules": {
+      "accuracy": 0.9588414634146342,
+      "precision": 0.9602272727272727,
+      "recall": 0.9818445896877269,
+      "f1": 0.970915619389587,
+      "positive_weak_target_count": 1377,
+      "note": null
+    },
+    "dense_pink_granules": {
+      "accuracy": 0.9771341463414634,
+      "precision": 0.8571428571428571,
+      "recall": 0.8275862068965517,
+      "f1": 0.8421052631578947,
+      "positive_weak_target_count": 145,
+      "note": null
+    },
+    "dense_blue_granules": {
+      "accuracy": 1.0,
+      "precision": null,
+      "recall": null,
+      "f1": null,
+      "positive_weak_target_count": 0,
+      "note": "No positive class-derived training targets exist."
+    },
+    "thin_rim_of_cytoplasm": {
+      "accuracy": 0.9466463414634146,
+      "precision": 0.9454976303317536,
+      "recall": 0.8295218295218295,
+      "f1": 0.8837209302325582,
+      "positive_weak_target_count": 481,
+      "note": null
+    },
+    "abundant_cytoplasm": {
+      "accuracy": 0.9659552845528455,
+      "precision": 0.7263157894736842,
+      "recall": 0.6272727272727273,
+      "f1": 0.6731707317073171,
+      "positive_weak_target_count": 110,
+      "note": null
+    },
+    "multi_lobed_nucleus_3_5": {
+      "accuracy": 0.9623983739837398,
+      "precision": 0.9699675324675324,
+      "recall": 0.9699675324675324,
+      "f1": 0.9699675324675324,
+      "positive_weak_target_count": 1232,
+      "note": null
+    },
+    "bilobed_nucleus": {
+      "accuracy": 0.9751016260162602,
+      "precision": 0.8380281690140845,
+      "recall": 0.8206896551724138,
+      "f1": 0.8292682926829268,
+      "positive_weak_target_count": 145,
+      "note": null
+    },
+    "kidney_bean_shaped_nucleus": {
+      "accuracy": 0.9644308943089431,
+      "precision": 0.7272727272727273,
+      "recall": 0.5818181818181818,
+      "f1": 0.6464646464646465,
+      "positive_weak_target_count": 110,
+      "note": null
+    },
+    "eccentric_and_large_nucleus": {
+      "accuracy": 0.9664634146341463,
+      "precision": 0.72,
+      "recall": 0.6545454545454545,
+      "f1": 0.6857142857142857,
+      "positive_weak_target_count": 110,
+      "note": null
+    },
+    "small_size_dense_cytoplasm": {
+      "accuracy": 0.945630081300813,
+      "precision": 0.9410377358490566,
+      "recall": 0.8295218295218295,
+      "f1": 0.881767955801105,
+      "positive_weak_target_count": 481,
+      "note": null
+    }
+  },
+  "model_path": "C:\\Users\\Asus\\Desktop\\WBC Classification\\models\\raabin_feature_cnn.keras",
+  "validation_csv": "C:\\Users\\Asus\\Desktop\\WBC Classification\\results\\raabin_feature_cnn_validation_with_vectors.csv",
+  "history_csv": "C:\\Users\\Asus\\Desktop\\WBC Classification\\reports\\raabin_feature_cnn_history.csv"
+}

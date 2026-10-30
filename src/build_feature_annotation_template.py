@@ -4,7 +4,7 @@ Run from the project root:
     python src/build_feature_annotation_template.py
 
 The worksheet includes no model predictions or class labels. Its training and
-validation partitions follow the same seeded group split as train.py.
+validation partitions are group-separated and class-stratified.
 """
 
 import argparse
@@ -20,9 +20,6 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_MANIFEST = PROJECT_ROOT / "data" / "manifests" / "raabin_train.csv"
 DEFAULT_PROCESSED_MANIFEST = (
     PROJECT_ROOT / "data" / "manifests" / "processed_raabin_train.csv"
-)
-DEFAULT_PREDICTIONS = (
-    PROJECT_ROOT / "results" / "raabin_train_feature_predictions.csv"
 )
 DEFAULT_OUTPUT = (
     PROJECT_ROOT / "results" / "raabin_feature_annotation_template.csv"
@@ -42,18 +39,15 @@ FEATURES = (
 )
 
 
-def _read_annotation_candidates(manifest_path, processed_manifest_path, predictions_path):
+def _read_annotation_candidates(manifest_path, processed_manifest_path):
     manifest = pd.read_csv(manifest_path)
     processed = pd.read_csv(processed_manifest_path)
-    predictions = pd.read_csv(predictions_path)
 
     required_manifest = {"path", "label", "dataset", "split", "group_id"}
     required_processed = {"raw_path", "path"}
-    required_predictions = {"image_filename", "actual_wbc_class"}
     for name, frame, required in (
         ("training manifest", manifest, required_manifest),
         ("processed manifest", processed, required_processed),
-        ("prediction file", predictions, required_predictions),
     ):
         missing = sorted(required.difference(frame.columns))
         if missing:
@@ -68,9 +62,6 @@ def _read_annotation_candidates(manifest_path, processed_manifest_path, predicti
     if unknown_classes:
         raise ValueError(f"Unsupported WBC classes in manifest: {unknown_classes}")
 
-    predictions["actual_wbc_class"] = (
-        predictions["actual_wbc_class"].astype(str).str.strip().str.lower()
-    )
     rows = manifest.merge(
         processed[["raw_path", "path"]].rename(columns={"path": "processed_path"}),
         left_on="path",
@@ -85,24 +76,16 @@ def _read_annotation_candidates(manifest_path, processed_manifest_path, predicti
     rows = rows.loc[rows["image_path"].map(Path.is_file)].copy()
     rows["image_filename"] = rows["image_path"].map(lambda path: path.name)
 
-    candidates = rows.merge(
-        predictions[["image_filename", "actual_wbc_class"]],
-        left_on=["image_filename", "label"],
-        right_on=["image_filename", "actual_wbc_class"],
-        how="inner",
-        validate="one_to_one",
-    )
-    if candidates.empty:
+    if rows.empty:
         raise ValueError(
-            "No accepted training images match the feature prediction file."
+            "No accepted training images match the processed manifest."
         )
-    return candidates.reset_index(drop=True)
+    return rows.reset_index(drop=True)
 
 
 def build_annotation_template(
     manifest_path=DEFAULT_MANIFEST,
     processed_manifest_path=DEFAULT_PROCESSED_MANIFEST,
-    predictions_path=DEFAULT_PREDICTIONS,
     output_path=DEFAULT_OUTPUT,
     train_per_class=100,
     validation_per_class=25,
@@ -111,9 +94,7 @@ def build_annotation_template(
     if train_per_class < 1 or validation_per_class < 1:
         raise ValueError("Sample counts must be positive integers.")
 
-    candidates = _read_annotation_candidates(
-        manifest_path, processed_manifest_path, predictions_path
-    )
+    candidates = _read_annotation_candidates(manifest_path, processed_manifest_path)
     labels = candidates["label"].to_numpy()
     groups = candidates["group_id"].astype(str).to_numpy()
     splitter = StratifiedGroupKFold(n_splits=5, shuffle=True, random_state=seed)
@@ -204,7 +185,6 @@ def main():
         type=Path,
         default=DEFAULT_PROCESSED_MANIFEST,
     )
-    parser.add_argument("--predictions", type=Path, default=DEFAULT_PREDICTIONS)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--train-per-class", type=int, default=100)
     parser.add_argument("--validation-per-class", type=int, default=25)
@@ -213,7 +193,6 @@ def main():
     build_annotation_template(
         manifest_path=args.manifest,
         processed_manifest_path=args.processed_manifest,
-        predictions_path=args.predictions,
         output_path=args.output,
         train_per_class=args.train_per_class,
         validation_per_class=args.validation_per_class,

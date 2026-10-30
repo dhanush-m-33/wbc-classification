@@ -1,28 +1,44 @@
 """
 WBC preprocessing: nucleus-guided cell detection (adaptive thresholds).
 
-Run from the project root:
-    python src/preprocess.py --only raabin_train --limit 100 --workers 4
+Run from the project root.
+
+Training data (Raabin train): detect, keep only good crops.
     python src/preprocess.py --only raabin_train --workers 4
-    python src/preprocess.py --workers 4
+
+Test data: never drop images. Every image gets a crop; hard ones fall back to
+the whole image. Evaluate from data/manifests/eval_<name>.csv.
+    python src/preprocess.py --only raabin_testA --fallback full --review-policy full --workers 4
+    python src/preprocess.py --only raabin_testB --fallback full --review-policy full --workers 4
+    python src/preprocess.py --only lisc         --fallback full --review-policy full --workers 4
+
+Inputs that are already tight single-cell crops (BCCD): skip detection.
+    python src/preprocess.py --only bccd --assume-cropped --workers 4
+
+Quick check on a sample (takes --limit rows PER CLASS):
+    python src/preprocess.py --only raabin_train --limit 20 --workers 4
 
 Each manifest must contain: path, dataset, split, label.
 
 Output:
     data/processed/<dataset>/<split>/<label>/*.png
-    data/processed/qc_<manifest>.csv
+    data/processed/qc_<manifest>.csv           every image + QC columns
     data/processed/preview_<manifest>.png
-    data/manifests/processed_<manifest>.csv   (accepted rows only)
+    data/manifests/processed_<manifest>.csv    accepted rows only (use for TRAINING)
+    data/manifests/eval_<manifest>.csv         every written crop (use for TESTING)
 
 QC flags:
     ok                              cell extent refined from colour foreground (accepted)
     nucleus_scaled                  crop sized from nucleus cluster (accepted)
+    assumed_crop                    --assume-cropped: whole image used, no detection (accepted)
     cell_touches_image_edge_review  cell touches the border
     off_centre_nucleus_review       selected nucleus far from image centre
     edge_padding_review             crop needed padding
     near_full_image_crop_review     crop covers >=90% of the image
     large_cell_box_review           box covers >60% of the image
-Review flags are excluded from the processed manifest unless --accept-review.
+    full_image_review               --review-policy full replaced a flagged crop by the whole image
+    full_image_fallback_review      no nucleus found; --fallback full used the whole image
+Review flags are excluded from processed_<manifest>.csv unless --accept-review.
 Original images are never modified.
 """
 
@@ -49,14 +65,25 @@ FALLBACK_MAX_FRAC = 0.60
 OFF_CENTRE_LIMIT = 0.45  # normalised distance beyond which a nucleus is flagged
 NUC_MEAN_CHROMA_MIN = 0
 
-ACCEPTED_DEFAULT = {"ok", "nucleus_scaled"}
+ACCEPTED_DEFAULT = {"ok", "nucleus_scaled", "assumed_crop"}
 ALL_REVIEW = {
     "cell_touches_image_edge_review",
     "off_centre_nucleus_review",
     "edge_padding_review",
     "near_full_image_crop_review",
     "large_cell_box_review",
+    "full_image_review",
+    "full_image_fallback_review",
 }
+# Flags where --review-policy full swaps the crop for the whole image.
+REPLACE_FLAGS = {
+    "cell_touches_image_edge_review",
+    "off_centre_nucleus_review",
+    "large_cell_box_review",
+    "near_full_image_crop_review",
+}
+NO_NUCLEUS_FLAGS = {"no_plausible_nucleus", "full_image_fallback_review"}
+FULL_IMAGE_FLAGS = {"full_image_review", "full_image_fallback_review"}
 
 
 def _odd(v, lo, hi):
@@ -153,7 +180,7 @@ def _pick_nucleus_cluster(mask, chroma, sh, sw, centre_weight):
                 "box": (x0, y0, bw, bh),
                 "fraction": float(frac),
                 "distance": float(dist),
-                "chroma": mean_chroma
+                "chroma": mean_chroma,
             }
     return best
 
@@ -258,7 +285,7 @@ def find_cell_box(rgb, max_dim=800, centre_weight=0.9):
         "component_centre_distance": np.nan,
         "qc_flag": "no_plausible_nucleus",
         "nuc_x": np.nan, "nuc_y": np.nan, "nuc_w": np.nan, "nuc_h": np.nan,
-        "nuc_chroma": np.nan
+        "nuc_chroma": np.nan,
     }
 
     nuc = detect_nucleus(small, centre_weight)
@@ -377,7 +404,19 @@ def process_one(job):
             rgb = np.asarray(im.convert("RGB"))
 
         h, w = rgb.shape[:2]
-        box, meta = find_cell_box(rgb, centre_weight=p["centre_weight"])
+        assume_cropped = bool(p.get("assume_cropped"))
+
+        if assume_cropped:
+            # Input is already a tight single-cell crop: no detection.
+            box = (0.0, 0.0, float(w), float(h))
+            meta = {
+                "detector_used": "assume_cropped",
+                "qc_flag": "assumed_crop",
+                "component_area_fraction": 0.0,
+                "component_centre_distance": float("nan"),
+            }
+        else:
+            box, meta = find_cell_box(rgb, centre_weight=p["centre_weight"])
 
         nuc_cols = {k: float(meta.get(k, np.nan))
                     for k in ("nuc_x", "nuc_y", "nuc_w", "nuc_h", "nuc_chroma")}
@@ -404,12 +443,23 @@ def process_one(job):
             win_fraction = side / max(h, w)
             flag = meta["qc_flag"]
 
-            if x < 0 or y < 0 or x + side > w or y + side > h:
-                flag = "edge_padding_review"
-            if win_fraction >= 0.90:
-                flag = "near_full_image_crop_review"
-            if box_fraction > 0.60:
-                flag = "large_cell_box_review"
+            if not assume_cropped:
+                if x < 0 or y < 0 or x + side > w or y + side > h:
+                    flag = "edge_padding_review"
+                if win_fraction >= 0.90:
+                    flag = "near_full_image_crop_review"
+                if box_fraction > 0.60:
+                    flag = "large_cell_box_review"
+
+                # Test-set policy: a flagged (probably wrong) crop is replaced
+                # by the whole centred image instead of being dropped.
+                if p.get("review_full") and (
+                    flag in REPLACE_FLAGS or meta["qc_flag"] in REPLACE_FLAGS
+                ):
+                    side = float(max(h, w))
+                    win = ((w - side) / 2.0, (h - side) / 2.0, side)
+                    win_fraction = 1.0
+                    flag = "full_image_review"
 
         output = crop_resize(rgb, win, p["size"])
         Path(out_path).parent.mkdir(parents=True, exist_ok=True)
@@ -424,8 +474,10 @@ def process_one(job):
             "win_x": float(win[0]), "win_y": float(win[1]),
             "win_side": float(win[2]), "win_frac": float(win_fraction),
             "box_area_fraction": float(box_fraction),
-            "nucleus_area_fraction": float(meta["component_area_fraction"]),
-            "nucleus_centre_distance": float(meta["component_centre_distance"]),
+            "nucleus_area_fraction": float(meta.get("component_area_fraction", 0.0)),
+            "nucleus_centre_distance": float(
+                meta.get("component_centre_distance", np.nan)
+            ),
             **nuc_cols,
             "mean_r": float(means[0]), "mean_g": float(means[1]),
             "mean_b": float(means[2]),
@@ -457,7 +509,7 @@ def make_preview(df, root, name, n=12):
     pieces = []
     if len(flagged):
         pieces.append(flagged.sample(min(len(flagged), max(1, n // 2)), random_state=7))
-    remaining = n - sum(len(p) for p in pieces)
+    remaining = n - sum(len(piece) for piece in pieces)
     if remaining > 0 and len(normal):
         pieces.append(normal.sample(min(len(normal), remaining), random_state=11))
     if not pieces:
@@ -530,14 +582,21 @@ def main():
     parser.add_argument("--margin", type=float, default=0.08)
     parser.add_argument("--min-side-px", type=int, default=32)
     parser.add_argument("--max-side-fraction", type=float, default=1.0)
-    parser.add_argument("--fallback", choices=["full", "skip"], default="skip")
+    parser.add_argument("--fallback", choices=["full", "skip"], default="skip",
+                        help="No nucleus found: skip the image, or use the whole image")
     parser.add_argument("--centre-weight", type=float, default=0.9,
                         help="Centre prior for choosing the nucleus (0 for multi-cell images)")
+    parser.add_argument("--assume-cropped", action="store_true",
+                        help="Inputs are already tight cell crops: use the whole image, no detection")
+    parser.add_argument("--review-policy", choices=["keep", "full"], default="keep",
+                        help="keep: leave flagged crops as they are; "
+                             "full: replace flagged crops by the whole image (for test sets)")
     parser.add_argument("--accept-review", action="store_true",
                         help="Also put *_review rows in the processed manifest")
     parser.add_argument("--workers", type=int, default=4)
     parser.add_argument("--only", default=None)
-    parser.add_argument("--limit", type=int, default=None)
+    parser.add_argument("--limit", type=int, default=None,
+                        help="Process only the first N rows of each class")
     args = parser.parse_args()
 
     if args.size < 8 or args.margin < 0 or args.min_side_px < 8 or args.workers < 1:
@@ -549,6 +608,8 @@ def main():
         "size": args.size, "margin": args.margin, "min_side": args.min_side_px,
         "max_fraction": args.max_side_fraction, "fallback": args.fallback,
         "centre_weight": args.centre_weight,
+        "assume_cropped": args.assume_cropped,
+        "review_full": args.review_policy == "full",
     }
     accepted_flags = set(ACCEPTED_DEFAULT)
     if args.accept_review:
@@ -565,13 +626,14 @@ def main():
             continue
 
         df = pd.read_csv(manifest_path)
-        if args.limit is not None:
-            df = df.groupby("label", group_keys=False).head(args.limit).copy()
 
         missing = {"path", "dataset", "split", "label"} - set(df.columns)
         if missing:
             print(f"[{name}] Missing columns {sorted(missing)}; skipping.")
             continue
+
+        if args.limit is not None:
+            df = df.groupby("label", group_keys=False).head(args.limit).copy()
 
         df = df.copy()
         df["raw_path"] = df["path"].astype(str)
@@ -601,22 +663,32 @@ def main():
         qc_path = out_dir / f"qc_{name}.csv"
         out.to_csv(qc_path, index=False)
 
-        errors = out[~out["ok"].fillna(False)]
+        ok_mask = out["ok"].fillna(False).astype(bool)
+        errors = out[~ok_mask]
+
+        # Training manifest: accepted rows only.
         accepted = out[
-            out["ok"].fillna(False)
-            & out["seg_ok"].fillna(False)
+            ok_mask
+            & out["seg_ok"].fillna(False).astype(bool)
             & out["qc_flag"].isin(accepted_flags)
         ].copy()
 
-        pm = root / "data" / "manifests" / f"processed_{name}.csv"
-        pm.parent.mkdir(parents=True, exist_ok=True)
+        manifest_dir = root / "data" / "manifests"
+        manifest_dir.mkdir(parents=True, exist_ok=True)
         cols = ["path"] + [c for c in accepted.columns if c not in {"path", "ok", "err"}]
+
+        pm = manifest_dir / f"processed_{name}.csv"
         accepted[cols].to_csv(pm, index=False)
+
+        # Evaluation manifest: every image that produced a crop, flagged or not.
+        evaluation = out[ok_mask].copy()
+        em = manifest_dir / f"eval_{name}.csv"
+        evaluation[cols].to_csv(em, index=False)
 
         make_preview(out, root, name)
 
         total = len(out)
-        good = int(out["ok"].fillna(False).sum())
+        good = int(ok_mask.sum())
 
         def pct(mask):
             return round(100.0 * mask.mean(), 1) if total else None
@@ -626,20 +698,23 @@ def main():
             "input_n": total,
             "output_files_n": good,
             "accepted_n": len(accepted),
-            "no_nucleus_n": int((out["qc_flag"] == "no_plausible_nucleus").sum()),
+            "no_nucleus_n": int(out["qc_flag"].isin(NO_NUCLEUS_FLAGS).sum()),
             "errors": int((out["qc_flag"] == "processing_error").sum()),
             "refined_pct": pct(out["qc_flag"].eq("ok")),
             "nucleus_scaled_pct": pct(out["qc_flag"].eq("nucleus_scaled")),
+            "assumed_pct": pct(out["qc_flag"].eq("assumed_crop")),
+            "full_image_pct": pct(out["qc_flag"].isin(FULL_IMAGE_FLAGS)),
             "review_pct": pct(out["qc_flag"].isin(ALL_REVIEW)),
             "median_crop_fraction": (
-                round(float(out.loc[out["ok"].fillna(False), "win_frac"].median()), 3)
+                round(float(out.loc[ok_mask, "win_frac"].median()), 3)
                 if good else None
             ),
         })
 
         print(f"  Output images: {good}/{total}; accepted manifest rows: {len(accepted)}")
         print(f"  QC report: {qc_path}")
-        print(f"  Processed manifest: {pm}")
+        print(f"  Training manifest: {pm}")
+        print(f"  Evaluation manifest: {em}")
         if len(errors):
             print("  Sample failures:",
                   errors[["raw_path", "qc_flag", "err"]].head(3).to_dict("records"))
